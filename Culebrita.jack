@@ -1,0 +1,95 @@
+//Representa la serpiente y las operaciones (crear, mover, alargar, acortar)
+class Culebrita {
+  function Array init(int l) {
+    var Array snake;
+    var int i;
+    let snake = Array.new(l);
+    let i = 0;
+    while (i < l) {
+      let snake[i] = Cell.new(i, 0);
+      do Cell.drawFullBlock(snake[i], true); 
+      let i = i + 1;
+    }
+    return snake;
+  }
+ 
+  function Cell getBlock(Array snake, int indx) {
+    return snake[indx];
+  }
+ 
+  // Mueve la serpiente, borra la cola, desplaza segmentos y crea la nueva cabeza en dir.
+  function void moveSnake(Array snake, int l, int dir) {
+    var int i, tmpl;
+    let i = 0;
+    let tmpl = l - 1;
+    do Cell.drawFullBlock(snake[i], false);
+    do Cell.dispose(snake[i]);
+    while (i < tmpl) {
+      let snake[i] = snake[i + 1];
+      let i = i + 1;
+    }
+    let snake[l - 1] = Cell.moveHeadBlock(snake[l - 1], dir);
+    return;
+  }
+
+  // Aumenta la longitud 
+  function Array lengthenSnake(Array snake, int l, Cell target) {
+    var int newLength, i;
+    var Array newSnake;
+    do Cell.drawFullBlock(target, true);
+    let newLength = l + 1;
+    let newSnake = Array.new(newLength);
+    let i = 0;
+    while (i < l) {
+      let newSnake[i] = snake[i];
+      let i = i + 1;
+    }
+    do snake.dispose();
+    let newSnake[i] = target;
+    return newSnake;
+  } 
+
+  // Reduce la longitud 
+  function Array shortenSnake(Array snake, int l) {
+    var int newLength, i;
+    var Array newSnake;
+    if (l < 2) {
+      return snake;
+    }
+    // clear (undraw) and dispose tail block (index 0) and shift others down
+    do Cell.drawFullBlock(snake[0], false);
+    do Cell.dispose(snake[0]);
+    let newLength = l - 1;
+    let newSnake = Array.new(newLength);
+    let i = 0;
+    while (i < newLength) {
+      let newSnake[i] = snake[i + 1];
+      let i = i + 1;
+    }
+    do snake.dispose();
+    return newSnake;
+  }
+
+  // Libera todos los bloques de la serpiente 
+  function void dispose(Array snake, int l) {
+    var int i;
+    let i = 0;
+    while (i < l) {
+      do Cell.dispose(Culebrita.getBlock(snake, i));
+      let i = i + 1;
+    }
+    do snake.dispose();
+    return;
+  }
+  
+  // imprime coordenadas de todos los segmentos.
+  function void printSnakeCoords(Array snake, int l) {
+    var int i;
+    let i = 0;
+    while (i < l) {
+      do Cell.printBlockCoord(snake[i]);
+      let i = i + 1;
+    }
+    return;
+  }   
+}

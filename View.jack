@@ -1,0 +1,235 @@
+// Controla la vista, inicialización, entrada, lógica (colisiones/comida)
+class View {
+  field int length;
+  field Culebrita snake;
+  field Cell target;
+  field int dir;
+
+  static boolean terminated;
+  static boolean shownWelcome;
+  static int speed;
+
+  //Configura semilla, tamaño de bloque, crea la serpiente y la primera comida.
+  constructor View init(int l) {
+    var int userSeed, ttype;
+    var String foodMsg;
+    do Screen.clearScreen();
+    if (~(shownWelcome)) {
+      do RNG.setSeed(View.askSeed());
+      let shownWelcome = true;
+    } else {
+      do RNG.setSeed(RNG.randRange(99));
+    }
+    do Cell.setBlockInfo(10, 1);
+    let length = l;
+    let snake = Culebrita.init(length);
+    let target = Cell.newRandBlock(snake, length);
+    let ttype = target.getFoodType();
+    do Output.moveCursor(0, 0);
+    do Output.printString("                    ");
+    do Output.moveCursor(0, 0);
+    if (ttype = 1) {
+      let foodMsg = "Comida: BUENA     ";
+    } else {
+      if (ttype = 2) {
+        let foodMsg = "Comida: MALA      ";
+      } else {
+        let foodMsg = "Comida: NORMAL    ";
+      }
+    }
+    do Output.printString(foodMsg);
+    do Output.println();
+    do foodMsg.dispose();
+    let dir = 1;
+    let speed = 120;
+    let terminated = false;
+    do Sys.wait(speed);
+    return this;
+  }
+
+  // Muestra la mensaje de bienvenida, instrucciones y espera una tecla
+  function int askSeed() {
+    var int userSeed, key;
+    var String message0, message1, message2, message3, message4;
+    var String exp0, exp1, exp2, exp3, exp4;
+    var boolean matched;
+    var Array tmpUsedNum;
+    let message0 = "Bienvenido a Culebrita";
+    let exp0 = "INSTRUCCIONES";
+    let exp1 = "1. Usa las flechas para mover a Culebrita.";
+    let exp2 = "2. Si te chocas contra una pared o tu cuerpo, pierdes.";
+    let exp3 = "3. Cuando Culebrita tenga 50 bloques de largo, ganas.";
+    let exp4 = "Presiona cualquier tecla para comenzar...";
+    do Screen.clearScreen();
+    do Output.moveCursor(0, 0);
+    do Output.printString(message0);
+    do Output.println();
+    do Output.println();
+    do Output.printString(exp0); 
+    do Output.println();
+    do Output.printString(exp1); 
+    do Output.println();
+    do Output.printString(exp2); 
+    do Output.println();
+    do Output.printString(exp3); 
+    do Output.println();
+    do Output.println();
+    do Output.printString(exp4);
+    do Output.println();
+    // esperar cualquier tecla (Keyboard.keyPressed devuelve 0 si no hay tecla)
+    let key = 0;
+    while (key = 0) {
+      let key = Keyboard.keyPressed();
+    }
+    let userSeed = key;
+    while (userSeed > 99) {
+      let userSeed = userSeed / 2;
+    }
+    do Screen.clearScreen();
+    do message0.dispose();
+    do exp0.dispose();
+    do exp1.dispose();
+    do exp2.dispose();
+    do exp3.dispose();
+    do exp4.dispose();
+    return userSeed;
+  }
+ 
+  //Lee teclado, actualiza dirección, verifica colisiones y procesa comida. Aparecen mensajes de ganar o perder
+  method boolean move() {
+    var int key, newL, hit, ftype;
+  var boolean lose, matched, restart;
+  var String loseMessage0, loseMessage1, c3, c2, c1; 
+  var String winMessage;
+  var String foodGood, foodBad, foodNorm;
+  var String pressR;
+  let loseMessage0 = "Perdiste :(";
+  let loseMessage1 = "";
+  let c3 = "";
+  let c2 = "";
+  let c1 = "";
+    let winMessage = "¡Ganaste!";
+  while (~(terminated)) {
+      let terminated = true;
+      let key = Keyboard.keyPressed();
+      if ((key = 132) & ~(dir = 2)) {let dir = 1;}
+      if ((key = 130) & ~(dir = 1)) {let dir = 2;}
+      if ((key = 131) & ~(dir = 4)) {let dir = 3;}
+      if ((key = 133) & ~(dir = 3)) {let dir = 4;}
+  let lose = Cell.seeIfLose(length, snake, dir);
+      if (lose) {
+        let terminated = true;
+        do Screen.clearScreen();
+        do Output.moveCursor(0, 0);
+    do Output.printString(loseMessage0);
+    do Output.println();
+    do Output.println();
+    do Output.printString(loseMessage1);
+    do Output.println();
+        let pressR = "Presiona R para reiniciar";
+        do Output.printString(pressR);
+        do Output.println();
+        let key = 0;
+        while (~((key = 82) | (key = 114))) {
+          let key = Keyboard.keyPressed();
+        }
+        do loseMessage0.dispose();
+        do loseMessage1.dispose();
+        do winMessage.dispose();
+        let restart = true;
+      } else {
+        let newL = length - 1;
+        let matched = Cell.matched(snake[newL], target, dir);
+        if (matched) {
+          let ftype = target.getFoodType();
+          if (ftype = 2) {
+            // comida mala aumenta velocidad y reduce el tamaño
+            let snake = Culebrita.shortenSnake(snake, length);
+            let length = length - 1;
+            if (speed > 30) {
+              let speed = speed - 30;
+            } else {
+              let speed = 10;
+            }
+          } else {
+            // normal o buena, aumenta tamaño
+            let snake = Culebrita.lengthenSnake(snake, length, target);
+            let length = length + 1;
+            // comida buena, disminuye velocidad
+            if (ftype = 1) {let speed = speed + 5;}
+          }
+          let target = Cell.newRandBlock(snake, length);
+          // muestra que tipo de comida es la que acaba de aparecer
+          let foodGood = "Comida: BUENA";
+          let foodBad = "Comida: MALA";
+          let foodNorm = "Comida: NORMAL";
+          let ftype = target.getFoodType();
+          do Output.moveCursor(0, 0);
+          // limpia la pantalla para evitar sobreposicion
+          do Output.printString("                    ");
+          do Output.moveCursor(0, 0);
+          if (ftype = 1) {
+            do Output.printString(foodGood);
+          } else {
+            if (ftype = 2) {
+              do Output.printString(foodBad);
+            } else {
+              do Output.printString(foodNorm);
+            }
+          }
+          do Output.println();
+          do foodGood.dispose();
+          do foodBad.dispose();
+          do foodNorm.dispose();
+          // ajusta veliciadd segun longitud
+          if (length = 10) {let speed = 110;}
+          if (length = 20) {let speed = 100;}
+          if (length = 25) {let speed = 90;}
+          if (length = 30) {let speed = 80;}
+          if (length = 40) {let speed = 70;}
+          if (length = 50) {let speed = 60;}
+        } else {
+          do Culebrita.moveSnake(snake, length, dir);
+        }
+        do Sys.wait(speed);
+        if (length = 50) {
+          do Screen.clearScreen();
+          do Output.moveCursor(0, 0);
+          do Output.printString(winMessage);
+          do Output.println();
+          do Output.printString(loseMessage1);
+          do Output.println();
+          do Output.println();
+          // mostrar mensaje y esperar que el usuario presione R para reiniciar
+          let pressR = "Presiona R para reiniciar";
+          do Output.printString(pressR);
+          do Output.println();
+          let key = 0;
+          while (~((key = 82) | (key = 114))) {
+            let key = Keyboard.keyPressed();
+            do Sys.wait(200);
+          }
+          do loseMessage0.dispose();
+          do loseMessage1.dispose();
+          do c3.dispose();
+          do c2.dispose();
+          do c1.dispose();
+          do winMessage.dispose();
+          let restart = true;
+        } else {
+          let terminated = false;
+        }
+      }
+    }
+    return restart;
+  }
+
+    //Destruir la serpiente 
+  method void dispose() {
+    do Culebrita.dispose(snake, length);
+    do Cell.dispose(target);
+    do Memory.deAlloc(this);
+    return;
+  }
+
+}

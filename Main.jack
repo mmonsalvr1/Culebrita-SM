@@ -1,0 +1,16 @@
+class Main {
+  // crea la vista y maneja reinicios
+  function void main() {
+    var View view;
+    var boolean restart;
+    let view = View.init(5);
+    let restart = view.move();
+    while (restart) {
+      let restart = false;
+      do view.dispose();
+      let view = View.init(5);
+      let restart = view.move();
+    }
+    return;
+  }
+}
