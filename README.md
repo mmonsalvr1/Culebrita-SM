@@ -9,7 +9,9 @@ Archivos
 - `Culebrita.jack` 
 - `RNG.jack` 
 
-Cómo compilar (PowerShell)
+---
+
+## ¿Cómo compilar (PowerShell)?
 - Abre PowerShell y ve a la carpeta `tools` del paquete nand2tetris (donde está `jackcompiler`).
 
 ```powershell
@@ -19,7 +21,13 @@ jackcompiler "C:\Users\Usuario\Downloads\Culebrita"
 
 Esto generará archivos `.vm` en la carpeta `Culebrita`.
 
-Cómo ejecutar
+---
+
+## ¿Cómo ejecutar?
 - Usando el VM Emulator del paquete nand2tetris: abre el emulador y carga los `.vm` generados.
 - Presiona "Run" y disfruta!
 
+---
+
+## Video Sustentación
+https://youtu.be/1CEkt1xgCfQ
